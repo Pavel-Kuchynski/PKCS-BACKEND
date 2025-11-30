@@ -1,0 +1,3 @@
+chesscom:
+  api:
+    base-url: https://api.chess.com/pub
