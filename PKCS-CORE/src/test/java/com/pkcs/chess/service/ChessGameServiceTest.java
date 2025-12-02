@@ -5,13 +5,13 @@ import com.pkcs.chess.model.chesscom.GamesResponse;
 import com.pkcs.chess.model.dto.GameDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.Collections;
 import java.util.List;
-
-import static org.mockito.Mockito.*;
 
 class ChessGameServiceTest {
 
@@ -21,8 +21,8 @@ class ChessGameServiceTest {
 
     @BeforeEach
     void setUp() {
-        chessComClient = mock(ChessComClient.class);
-        chessPgnParserService = mock(ChessPgnParserService.class);
+        chessComClient = Mockito.mock(ChessComClient.class);
+        chessPgnParserService = Mockito.mock(ChessPgnParserService.class);
         chessGameService = new ChessGameService(chessComClient, chessPgnParserService);
     }
 
@@ -32,11 +32,11 @@ class ChessGameServiceTest {
         String year = "2024";
         String month = "06";
 
-        GamesResponse gamesResponse = mock(GamesResponse.class);
-        when(gamesResponse.getGames()).thenReturn(Collections.emptyList());
-        when(chessComClient.getPlayerGames(username, year, month)).thenReturn(Mono.just(gamesResponse));
+        GamesResponse gamesResponse = Mockito.mock(GamesResponse.class);
+        Mockito.when(gamesResponse.getGames()).thenReturn(Collections.emptyList());
+        Mockito.when(chessComClient.getPlayerGames(username, year, month)).thenReturn(Mono.just(gamesResponse));
 
-        when(chessPgnParserService.parsePgn(anyString())).thenReturn(Collections.emptyList());
+        Mockito.when(chessPgnParserService.parsePgn(ArgumentMatchers.anyString())).thenReturn(Collections.emptyList());
 
         Mono<List<GameDto>> result = chessGameService.fetchPlayerGames(username, year, month);
 
@@ -44,6 +44,6 @@ class ChessGameServiceTest {
                 .expectNextMatches(List::isEmpty)
                 .verifyComplete();
 
-        verify(chessComClient).getPlayerGames(username, year, month);
+        Mockito.verify(chessComClient).getPlayerGames(username, year, month);
     }
 }
