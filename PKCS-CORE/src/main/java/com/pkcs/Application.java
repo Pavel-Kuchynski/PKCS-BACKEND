@@ -1,4 +1,4 @@
-package com.pkcs.chess;
+package com.pkcs;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
