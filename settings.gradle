@@ -1,2 +1,4 @@
 rootProject.name = 'chess-backend'
 include 'PKCS-CORE'
+include 'PKCS-DS'
+include 'PKCS-API'

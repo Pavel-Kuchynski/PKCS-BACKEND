@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/chess")
+@RequestMapping("/api/${service.api.version}/chess")
 @RequiredArgsConstructor
 public class ChessController {
     private final ChessGameService chessGameService;

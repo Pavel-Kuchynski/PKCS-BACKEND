@@ -1,3 +1,7 @@
 chesscom:
   api:
     base-url: https://api.chess.com/pub
+
+service:
+  api:
+    version: v1
