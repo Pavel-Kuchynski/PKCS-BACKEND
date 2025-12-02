@@ -1,0 +1,10 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://admin:password@127.0.0.1:38861/chess?authSource=admin
+server:
+  port: 8082
+
+service:
+  api:
+    version: v1
