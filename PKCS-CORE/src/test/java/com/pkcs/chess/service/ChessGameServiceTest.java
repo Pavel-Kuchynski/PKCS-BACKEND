@@ -1,17 +1,17 @@
 package com.pkcs.chess.service;
 
-import chess.client.ChessComClient;
-import chess.model.chesscom.GamesResponse;
-import chess.model.dto.GameDto;
+import com.pkcs.chess.client.ChessComClient;
+import com.pkcs.chess.model.chesscom.GamesResponse;
+import com.pkcs.chess.model.dto.GameDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.Collections;
 import java.util.List;
-
-import static org.mockito.Mockito.*;
 
 class ChessGameServiceTest {
 
