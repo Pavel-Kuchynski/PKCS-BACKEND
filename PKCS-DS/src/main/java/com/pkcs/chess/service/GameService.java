@@ -9,8 +9,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.util.Objects;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -26,7 +24,6 @@ public class GameService {
      */
     public Mono<GameDto> saveGame(GameDto game) {
         return Mono.fromCallable(() -> mapper.map(game, GameDocument.class))
-                .doOnEach(signal -> log.info("Saving game: {}", Objects.requireNonNull(signal.get()).getId()))
                 .map(repository::save)
                 .map(savedGame -> game);
     }

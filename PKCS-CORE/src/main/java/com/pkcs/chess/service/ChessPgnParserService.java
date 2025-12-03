@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -20,7 +19,7 @@ public class ChessPgnParserService {
      * @param pgn the PGN string to parse
      * @return a list of Game objects
      */
-    public List<Game> parsePgn(String pgn) {
+    public Game parsePgn(String pgn) {
         try {
             UUID uuid = UUID.randomUUID();
             File tempFile = File.createTempFile("tempGame_" + uuid, ".pgn");
@@ -32,7 +31,7 @@ public class ChessPgnParserService {
 
             PgnHolder pgnHolder = new PgnHolder(tempFile.getAbsolutePath());
             pgnHolder.loadPgn();
-            return pgnHolder.getGames();
+            return pgnHolder.getGames().iterator().next();
         } catch (Exception e) {
             throw new RuntimeException("Error during PGN parsing ", e);
         }
