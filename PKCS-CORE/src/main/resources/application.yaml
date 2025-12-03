@@ -2,6 +2,21 @@ chesscom:
   api:
     base-url: https://api.chess.com/pub
 
+pkcs:
+  api:
+    pkcs-ds:
+      base-url: http://localhost:8082/api/v1
+
 service:
   api:
     version: v1
+
+cognito:
+  token-uri: https://eu-central-1htffb4azc.auth.eu-central-1.amazoncognito.com/oauth2/token
+  client-id: 2keqrk2fosob57vb6esti657aj
+  client-secret: ${PKCS_OCTA_CLIENT_SECRET}
+  scope: default-m2m-resource-server-y3x2yj/read
+
+logging:
+  level:
+    root: INFO
