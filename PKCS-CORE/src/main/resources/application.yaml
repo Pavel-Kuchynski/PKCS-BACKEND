@@ -3,13 +3,28 @@ chesscom:
     base-url: https://api.chess.com/pub
 
 pkcs:
+  concurrent-requests:
+    max: 100
   api:
     pkcs-ds:
       base-url: http://localhost:8082/api/v1
 
+spring:
+  application:
+    name: pkcs-core
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_htFfb4Azc
+          jwk-set-uri: https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_htFfb4Azc/.well-known/jwks.json
+
 service:
   api:
     version: v1
+
+server:
+  port: 8080
 
 cognito:
   token-uri: https://eu-central-1htffb4azc.auth.eu-central-1.amazoncognito.com/oauth2/token

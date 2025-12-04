@@ -24,6 +24,7 @@ public class GameService {
      */
     public Mono<GameDto> saveGame(GameDto game) {
         return Mono.fromCallable(() -> mapper.map(game, GameDocument.class))
+                .doOnNext(document-> log.info("Saving game with id: {}", document.getId()))
                 .map(repository::save)
                 .map(savedGame -> game);
     }

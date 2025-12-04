@@ -12,7 +12,9 @@ spring:
           jwk-set-uri: https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_htFfb4Azc/.well-known/jwks.json
 server:
   port: 8082
-
+  netty:
+    max-connections: 10000
+    io-worker-count: 16
 service:
   api:
     version: v1
