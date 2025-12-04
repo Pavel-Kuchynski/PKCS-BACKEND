@@ -11,6 +11,7 @@ import com.pkcs.chess.model.dto.HalfMoveDto;
 import com.pkcs.chess.model.dto.PlayerDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -28,6 +29,9 @@ public class ChessGameService {
     private final DataServiceClient dataServiceClient;
     private final ChessPgnParserService chessPgnParserService;
 
+    @Value("${pkcs.concurrent-requests.max: 50}")
+    private Integer concurrencyLimit;
+
     /**
      * Fetches the games of a player for a specific month.
      *
@@ -44,8 +48,8 @@ public class ChessGameService {
                         Mono.fromCallable(() -> chessPgnParserService.parsePgn(gameResp.getPgn()))
                                 .subscribeOn(Schedulers.boundedElastic()))
                 .map(this::mapToGameDto)
-                .doOnNext(game-> log.debug("Save game with id: {}", game.id()))
-                .flatMap(dataServiceClient::saveGame);
+                .doOnNext(game-> log.info("Save game with id: {}", game.id()))
+                .flatMap(dataServiceClient::saveGame, concurrencyLimit);
     }
 
     private GameDto mapToGameDto(Game game) {

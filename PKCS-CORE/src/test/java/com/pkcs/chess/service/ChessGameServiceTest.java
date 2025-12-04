@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+import org.springframework.test.util.ReflectionTestUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -34,6 +35,7 @@ class ChessGameServiceTest {
         dataServiceClient = Mockito.mock(DataServiceClient.class);
         chessPgnParserService = Mockito.mock(ChessPgnParserService.class);
         chessGameService = new ChessGameService(chessComClient, dataServiceClient, chessPgnParserService);
+        ReflectionTestUtils.setField(chessGameService, "concurrencyLimit", 10);
     }
 
     @Test
