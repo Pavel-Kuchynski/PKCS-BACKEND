@@ -1,6 +1,0 @@
-server:
-  port: 8080
-
-chess:
-  api:
-    base-url: https://api.chess.com/pub

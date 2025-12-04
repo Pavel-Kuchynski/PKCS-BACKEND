@@ -1,8 +1,0 @@
-spring:
-  profiles: local
-  data:
-    mongodb:
-      uri: mongodb://admin:password@127.0.0.1:38861/chess
-
-server:
-  port: 8082

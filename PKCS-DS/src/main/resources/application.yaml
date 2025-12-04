@@ -3,18 +3,20 @@ spring:
     name: pkcs-ds
   data:
     mongodb:
-      uri: mongodb://admin:password@127.0.0.1:38861/chess?authSource=admin
+      uri: ${SPRING_DATA_MONGODB_URI}
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_htFfb4Azc
           jwk-set-uri: https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_htFfb4Azc/.well-known/jwks.json
+
 server:
   port: 8082
   netty:
     max-connections: 10000
     io-worker-count: 16
+
 service:
   api:
     version: v1
