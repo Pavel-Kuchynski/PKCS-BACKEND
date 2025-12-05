@@ -1,7 +1,10 @@
 # Smaller OS footprint using JRE
-FROM eclipse-temurin:17.0.6_10-jre-alpine
+FROM eclipse-temurin:17-jre
+
 WORKDIR /app
 
-ADD build/libs/*.jar /app/app.jar
+COPY build/libs/PKCS-CORE-0.0.1-SNAPSHOT.jar app.jar
 
-CMD ["java", "-jar", "app.jar"]
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

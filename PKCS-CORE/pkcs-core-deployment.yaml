@@ -1,0 +1,28 @@
+# pkcs-core-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pkcs-core
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pkcs-core
+  template:
+    metadata:
+      labels:
+        app: pkcs-core
+    spec:
+      containers:
+        - name: pkcs-core
+          image: pkcs-core:1.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PKCS_DS_BASE_URL
+              value: "http://pkcs-ds-service:8082"
+            - name: PKCS_OCTA_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                 name: pkcs-core-secret
+                 key: octa-secret

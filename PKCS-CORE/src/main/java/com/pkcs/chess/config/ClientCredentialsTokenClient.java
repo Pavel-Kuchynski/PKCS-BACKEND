@@ -3,6 +3,7 @@ package com.pkcs.chess.config;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -30,6 +31,7 @@ public class ClientCredentialsTokenClient {
     private final AtomicReference<CachedToken> cachedToken = new AtomicReference<>();
     private final AtomicReference<Mono<CachedToken>> inFlightRequest = new AtomicReference<>();
 
+    @Autowired
     public ClientCredentialsTokenClient(@Value("${cognito.token-uri}") String tokenUri,
                                         @Value("${cognito.client-id}") String clientId,
                                         @Value("${cognito.client-secret}") String clientSecret,
@@ -54,18 +56,22 @@ public class ClientCredentialsTokenClient {
         this.tokenUri = "";
     }
 
+    // Synchronized method to get access token
     public Mono<String> getAccessToken() {
         CachedToken token = cachedToken.get();
 
+        // Return cached token if valid
         if (token != null && !token.isExpired()) {
             return Mono.just(token.token());
         }
 
+        // Check for in-flight request
         Mono<CachedToken> existingRequest = inFlightRequest.get();
         if (existingRequest != null) {
             return existingRequest.map(CachedToken::token);
         }
 
+        // Initiate new token request
         Mono<CachedToken> newRequest = requestNewToken()
                 .doOnNext(newToken -> {
                     cachedToken.set(newToken);
@@ -74,10 +80,12 @@ public class ClientCredentialsTokenClient {
                 .doFinally(signal -> inFlightRequest.set(null))
                 .cache();
 
+        // Attempt to set the in-flight request
         if (inFlightRequest.compareAndSet(null, newRequest)) {
             return newRequest.map(CachedToken::token);
         }
 
+        // Another request was set in the meantime, use that one
         return inFlightRequest.get().map(CachedToken::token);
     }
 
@@ -102,7 +110,7 @@ public class ClientCredentialsTokenClient {
                 )
                 .bodyToMono(TokenResponse.class)
                 .doOnNext(token ->
-                        log.info("Access token successfully obtained, expires in {} sec",
+                        log.debug("Access token successfully obtained, expires in {} sec",
                                 token.expiresIn()))
                 .map(tr -> new CachedToken(
                         tr.accessToken(),
