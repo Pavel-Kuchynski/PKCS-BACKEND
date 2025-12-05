@@ -6,6 +6,7 @@ import com.github.bhlangonijr.chesslib.game.Game;
 import com.github.bhlangonijr.chesslib.move.Move;
 import com.pkcs.chess.client.ChessComClient;
 import com.pkcs.chess.client.DataServiceClient;
+import com.pkcs.chess.model.chesscom.GamesResponse;
 import com.pkcs.chess.model.dto.GameDto;
 import com.pkcs.chess.model.dto.HalfMoveDto;
 import com.pkcs.chess.model.dto.PlayerDto;
@@ -20,6 +21,7 @@ import reactor.core.scheduler.Schedulers;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -41,15 +43,41 @@ public class ChessGameService {
      * @return a Mono emitting the GamesResponse containing the player's games
      */
     public Flux<GameDto> fetchPlayerGames(String username, String year, String month) {
-        log.info("Fetching games for user: {} for month: {}", username, String.format("%s/%s", year, month));
+        log.debug("Fetching games for user: {} for month: {}/{}", username, year, month);
         return chessComClient.getPlayerGames(username, year, month)
-                .flatMapMany(response -> Flux.fromIterable(response.getGames()))
+                .onErrorResume(ex -> {
+                    log.error("Chess.com unavailable for {}/{}/{}. Returning empty result.",
+                            username, year, month, ex);
+                    return Mono.just(new GamesResponse(List.of()));
+                })
+                .flatMapMany(response ->
+                        Flux.fromIterable(
+                                Optional.ofNullable(response.getGames())
+                                        .orElse(List.of())
+                        )
+                )
                 .flatMap(gameResp ->
-                        Mono.fromCallable(() -> chessPgnParserService.parsePgn(gameResp.getPgn()))
-                                .subscribeOn(Schedulers.boundedElastic()))
+                                Mono.fromCallable(() -> chessPgnParserService.parsePgn(gameResp.getPgn()))
+                                        .subscribeOn(Schedulers.boundedElastic())
+                                        .onErrorResume(ex -> {
+                                            log.warn("Invalid PGN skipped. Game={}", gameResp.getUrl(), ex);
+                                            return Mono.empty();
+                                        }),
+                        4
+                )
                 .map(this::mapToGameDto)
-                .doOnNext(game-> log.info("Save game with id: {}", game.id()))
-                .flatMap(dataServiceClient::saveGame, concurrencyLimit);
+                .doOnNext(game -> log.debug("Saving game with id: {}", game.id()))
+                .flatMap(game ->
+                                dataServiceClient.saveGame(game)
+                                        .onErrorResume(ex -> {
+                                            log.error("Failed to save game {}. Skipped.", game.id(), ex);
+                                            return Mono.empty();
+                                        }),
+                        concurrencyLimit
+                )
+                .onErrorContinue((ex, obj) ->
+                        log.error("Unexpected error in pipeline. Skipping element: {}", obj, ex)
+                );
     }
 
     private GameDto mapToGameDto(Game game) {
