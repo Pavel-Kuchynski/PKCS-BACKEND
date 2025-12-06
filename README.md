@@ -45,4 +45,16 @@ namespaces:
     ```shell
     minikube service pkcs-ds-service
 
-# PKCS-BACKEND
+## PKCS-BACKEND
+    This service is responcibel to work with frontend application.
+### PKCS-BACKEND Deployment
+To deploy the PKCS backend service, follow these steps:
+1. Populate sensitive information in Kubernetes secrets:
+    ```shell
+   kubectl apply -f pkcs-core-secret.yaml
+2. Run the deployment configuration for the PKCS backend service:
+   ```shell
+   kubectl apply -f pkcs-backend-deployment.yaml
+3. Expose the PKCS backend service:
+   ```shell
+    kubectl apply -f pkcs-backend-service.yaml

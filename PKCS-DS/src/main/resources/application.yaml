@@ -10,6 +10,8 @@ spring:
         jwt:
           issuer-uri: https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_htFfb4Azc
           jwk-set-uri: https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_htFfb4Azc/.well-known/jwks.json
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
 
 server:
   port: 8082
