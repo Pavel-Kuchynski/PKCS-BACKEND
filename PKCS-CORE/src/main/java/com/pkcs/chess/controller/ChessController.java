@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/${service.api.version}/chess")
@@ -21,5 +22,10 @@ public class ChessController {
                                               @PathVariable String year,
                                               @PathVariable String month) {
         return chessGameService.fetchPlayerGames(username, year, month);
+    }
+
+    @GetMapping("/{id}")
+    public Mono<GameDto> getGame(@PathVariable String id) {
+        return chessGameService.getGame(id);
     }
 }

@@ -14,7 +14,7 @@ public class GameResponse {
     private String url;
     private String pgn;
     @JsonProperty(value = "time_control")
-    private long timeControl;
+    private String timeControl;
     @JsonProperty(value = "end_time")
     private String endTime;
     private boolean rated;
