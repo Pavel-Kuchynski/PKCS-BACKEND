@@ -1,9 +1,10 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: kafka
   namespace: kafka
 spec:
+  serviceName: "kafka"
   replicas: 1
   selector:
     matchLabels:
@@ -31,9 +32,9 @@ spec:
             - name: KAFKA_CONTROLLER_QUORUM_VOTERS
               value: "1@localhost:9093"
             - name: KAFKA_LISTENERS
-              value: "PLAINTEXT://:9092,CONTROLLER://:9093"
+              value: PLAINTEXT://:9092,CONTROLLER://0.0.0.0:9093
             - name: KAFKA_ADVERTISED_LISTENERS
-              value: "PLAINTEXT://kafka:9092,CONTROLLER://localhost:9093"
+              value: PLAINTEXT://kafka-0.kafka.kafka.svc.cluster.local:9092,CONTROLLER://localhost:9093
             - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
               value: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
             - name: KAFKA_CONTROLLER_LISTENER_NAMES
@@ -42,6 +43,14 @@ spec:
               value: "/var/lib/kafka/data"
             - name: ALLOW_PLAINTEXT_LISTENER
               value: "yes"
+            - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+              value: "1"
+            - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
+              value: "1"
+            - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
+              value: "1"
+            - name: KAFKA_MIN_INSYNC_REPLICAS
+              value: "1"
           volumeMounts:
             - name: kafka-data
               mountPath: /var/lib/kafka/data
@@ -55,7 +64,11 @@ spec:
               port: 9092
             initialDelaySeconds: 120
             periodSeconds: 20
-      volumes:
-        - name: kafka-data
-          persistentVolumeClaim:
-            claimName: kafka-pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: kafka-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi

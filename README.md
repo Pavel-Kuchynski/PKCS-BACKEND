@@ -58,3 +58,12 @@ To deploy the PKCS backend service, follow these steps:
 3. Expose the PKCS backend service:
    ```shell
     kubectl apply -f pkcs-backend-service.yaml
+
+### Create new topics in Kafka
+    ```shell
+    kubectl -n kafka exec -it <kafka-pod-name> -- \
+    /opt/kafka/bin/kafka-topics.sh --create \
+      --bootstrap-server localhost:9092 \
+      --replication-factor 1 \
+      --partitions 4 \
+      --topic game.saved

@@ -9,7 +9,6 @@ import com.pkcs.chess.model.chesscom.GamesResponse;
 import com.pkcs.chess.model.dto.GameDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -28,13 +27,15 @@ class ChessGameServiceTest {
     private DataServiceClient dataServiceClient;
     private ChessPgnParserService chessPgnParserService;
     private ChessGameService chessGameService;
+    private GameSavePublisher gameSavePublisher;
 
     @BeforeEach
     void setUp() {
         chessComClient = Mockito.mock(ChessComClient.class);
         dataServiceClient = Mockito.mock(DataServiceClient.class);
         chessPgnParserService = Mockito.mock(ChessPgnParserService.class);
-        chessGameService = new ChessGameService(chessComClient, dataServiceClient, chessPgnParserService);
+        gameSavePublisher = Mockito.mock(GameSavePublisher.class);
+        chessGameService = new ChessGameService(chessComClient, dataServiceClient, chessPgnParserService, gameSavePublisher);
         ReflectionTestUtils.setField(chessGameService, "concurrencyLimit", 10);
     }
 
@@ -76,9 +77,10 @@ class ChessGameServiceTest {
 
         when(chessPgnParserService.parsePgn(ArgumentMatchers.anyString())).thenReturn(parsedGame);
 
-        // Use thenReturn with a Flux that captures and emits the input argument
-        ArgumentCaptor<GameDto> gameDtoCaptor = ArgumentCaptor.forClass(GameDto.class);
-        when(dataServiceClient.saveGame(gameDtoCaptor.capture())).thenAnswer(invocation -> Flux.just(gameDtoCaptor.getValue()));
+        when(gameSavePublisher.publishGameSaved(any(GameDto.class))).thenAnswer(invocation -> {
+            GameDto gameDto = invocation.getArgument(0);
+            return Flux.just(gameDto);
+        });
 
         Flux<GameDto> result = chessGameService.fetchPlayerGames(username, year, month);
 
@@ -88,6 +90,6 @@ class ChessGameServiceTest {
 
         Mockito.verify(chessComClient).getPlayerGames(username, year, month);
         Mockito.verify(chessPgnParserService).parsePgn(any(String.class));
-        Mockito.verify(dataServiceClient).saveGame(any(GameDto.class));
+        Mockito.verify(gameSavePublisher).publishGameSaved(any(GameDto.class));
     }
 }

@@ -30,6 +30,7 @@ public class ChessGameService {
     private final ChessComClient chessComClient;
     private final DataServiceClient dataServiceClient;
     private final ChessPgnParserService chessPgnParserService;
+    private final GameSavePublisher gameSavePublisher;
 
     @Value("${pkcs.concurrent-requests.max: 50}")
     private Integer concurrencyLimit;
@@ -67,17 +68,14 @@ public class ChessGameService {
                 )
                 .map(this::mapToGameDto)
                 .doOnNext(game -> log.debug("Saving game with id: {}", game.id()))
-                .flatMap(game ->
-                                dataServiceClient.saveGame(game)
-                                        .onErrorResume(ex -> {
-                                            log.error("Failed to save game {}. Skipped.", game.id(), ex);
-                                            return Mono.empty();
-                                        }),
-                        concurrencyLimit
-                )
+                .flatMap(gameSavePublisher::publishGameSaved, concurrencyLimit)
                 .onErrorContinue((ex, obj) ->
                         log.error("Unexpected error in pipeline. Skipping element: {}", obj, ex)
                 );
+    }
+
+    public Mono<GameDto> getGame(String id) {
+        return dataServiceClient.getGameById(id);
     }
 
     private GameDto mapToGameDto(Game game) {

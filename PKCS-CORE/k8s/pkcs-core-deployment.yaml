@@ -1,8 +1,8 @@
-# pkcs-core-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: pkcs-core
+  namespace: default
 spec:
   replicas: 1
   selector:
@@ -20,11 +20,11 @@ spec:
             - containerPort: 8080
           env:
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
-            - value: "kafka.kafka.svc.cluster.local:9092"
+              value: "kafka.kafka.svc.cluster.local:9092"
             - name: PKCS_DS_BASE_URL
               value: "http://pkcs-ds-service:8082"
             - name: PKCS_OCTA_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
-                 name: pkcs-core-secret
-                 key: octa-secret
+                  name: pkcs-core-secret
+                  key: octa-secret
