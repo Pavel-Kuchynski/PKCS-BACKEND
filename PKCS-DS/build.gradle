@@ -38,3 +38,7 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+tasks.named('bootJar') {
+    archiveBaseName = 'pkcs-ds'
+}
